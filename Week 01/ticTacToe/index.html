@@ -32,12 +32,13 @@
 
     <script>
       let pattern = [
-        [2, 0, 0],
-        [0, 1, 0],
+        [0, 0, 0],
+        [0, 0, 0],
         [0, 0, 0],
       ];
 
       let color = 1;
+      let result = false;
 
       function show() {
         let board = document.getElementById("board");
@@ -55,19 +56,37 @@
         }
       }
 
-      function move(x, y) {
-        pattern[x][y] = color;
-        // if (check()) {
-        //   alert(color === 2 ? "❌ is winner!" : "⭕ is winner!");
-        // }
-        color = 3 - color;
-        show();
+      function move(x, y) { // ❌is 2; ⭕is 1;
+        if (pattern[x][y] === 0 && result === false) {
+          pattern[x][y] = color;
+          show();
+          if (check(pattern, color)) {
+            setTimeout( function() { 
+              alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
+            }, 300);
+            result = true;
+          }
+          if(willwin(pattern, color)  && result === false) {
+            setTimeout( function() { 
+              alert((3 - color) === 2 ? "❌ will winner!" : "⭕ will win!")
+            }, 300);
+          }
+          color = 3 - color;
+        } else {
+          if (result === true) {
+            setTimeout( function() { 
+              alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
+            }, 300);
+          }
+        }
       }
 
-      function check() {
+      function check(pattern, color) {
+        // 横线
         for (let i = 0; i < 3; i++) {
           let win = true;
           for (let j = 0; j < 3; j++) {
+            // console.log('pattern['+i+']['+j+']', pattern[i][j], color);
             if (pattern[i][j] !== color) {
               win = false;
             }
@@ -77,9 +96,11 @@
           }
         }
 
+        // 竖线
         for (let i = 0; i < 3; i++) {
           let win = true;
           for (let j = 0; j < 3; j++) {
+            // console.log('pattern['+j+']['+i+']', pattern[j][i], color);
             if (pattern[j][i] !== color) {
               win = false;
             }
@@ -89,30 +110,53 @@
           }
         }
 
+        // 右斜线
         {
           let win = true;
           for (let j = 0; j < 3; j++) {
+            // console.log('pattern['+j+']['+j+']', pattern[j][j], color, j);
             if (pattern[j][j] !== color) {
               win = false;
             }
-            if (win) {
+            if (win && j===2) {
               return true;
             }
           }
         }
 
+        // 左斜线
         {
           let win = true;
           for (let j = 0; j < 3; j++) {
+            // console.log('pattern['+j+']['+(2-j)+']', pattern[j][2 - j], color, j);
             if (pattern[j][2 - j] !== color) {
               win = false;
             }
-            if (win) {
+            if (win && j===2) {
               return true;
             }
           }
         }
+
         return false;
+      }
+
+      function clone(pattern) {
+        return JSON.parse(JSON.stringify(pattern));
+      }
+
+      function willwin(pattern, color) {
+        for(let i = 0; i < 3; i++) {
+          for(let j = 0; j < 3; j++) {
+            if (pattern[i][j])
+              continue;
+            let tmp = clone(pattern);
+            tmp[i][j] = color;
+            if (check(tmp, color)) {
+              return true;
+            }
+          }
+        }
       }
 
       show();
