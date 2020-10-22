@@ -59,25 +59,35 @@
       function move(x, y) { // ❌is 2; ⭕is 1;
         if (pattern[x][y] === 0 && result === false) {
           pattern[x][y] = color;
-          show();
-          if (check(pattern, color)) {
-            setTimeout( function() { 
-              alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
-            }, 300);
-            result = true;
+          {
+            show();
+            if (check(pattern, color)) {
+              setTimeout( function() { 
+                alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
+              }, 300);
+              result = true;
+            }
+            if(willwin(pattern, color)  && result === false) {
+              setTimeout( function() { 
+                console.log((3 - color) === 2 ? "❌ will winner!" : "⭕ will win!")
+              }, 300);
+            }
+            color = 3 - color;
           }
-          if(willwin(pattern, color)  && result === false) {
-            setTimeout( function() { 
-              alert((3 - color) === 2 ? "❌ will winner!" : "⭕ will win!")
-            }, 300);
-          }
-          color = 3 - color;
+          computerMove();
         } else {
           if (result === true) {
             setTimeout( function() { 
               alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
             }, 300);
           }
+        }
+        // console.log('当前落子最好的位置----当前落子是否会赢？',bestchoice(pattern, color));
+        if (bestchoice(pattern, color).point) {
+          console.log( (color===2?'❌':'⭕') + 
+          '最好的位置是：' + bestchoice(pattern, color).point, 
+          bestchoice(pattern, color).result > 0 ? '会赢' :
+            bestchoice(pattern, color).result < 0 ? '会输' : '会和棋');
         }
       }
 
@@ -137,12 +147,12 @@
             }
           }
         }
-
         return false;
       }
 
       function clone(pattern) {
         return JSON.parse(JSON.stringify(pattern));
+        // return Object.create(pattern); // 二维数组变成一维数组之后可以用这种方法clone---优点：节省内存空间
       }
 
       function willwin(pattern, color) {
@@ -153,13 +163,67 @@
             let tmp = clone(pattern);
             tmp[i][j] = color;
             if (check(tmp, color)) {
-              return true;
+              return [i, j];
             }
           }
+        }
+        return null;
+      }
+
+      function bestchoice(pattern, color) {
+        let point = willwin(pattern, color);
+        if( point ) { // 对面要赢的子就是我们落子的地方
+          return {
+            point: point, // [i,j]
+            result: 1 //1是赢，0是和，-1是输
+          }
+        }
+        let result = -2; // 初始值
+        outer: for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (pattern[i][j])  // 已经有子就跳过去
+              continue;
+            let tmp = clone(pattern);
+            tmp[i][j] = color;
+            let r = bestchoice(tmp, 3-color).result;
+            if ( -r > result ) {
+              result = -r; // 对面是1我们就是-1
+              point = [i, j];
+            }
+            if (result === 1) // 胜负剪枝
+              break outer;
+          }
+        }
+        return {
+          point: point,
+          result: point ? result : 0 //没有point代表要和棋了
+        }
+      }
+      
+      function computerMove() {
+        let choice = bestchoice(pattern, color);
+        if (choice.point)
+          pattern[choice.point[0]][choice.point[1]] = color;
+        // 和move重复的部分
+        {
+          show();
+          if (check(pattern, color)) {
+            setTimeout( function() {
+              alert((3 - color) === 2 ? "❌ is winner!" : "⭕ is winner!")
+            }, 300);
+            result = true;
+          }
+          if(willwin(pattern, color)  && result === false) {
+            setTimeout( function() {
+              console.log((3 - color) === 2 ? "❌ will winner!" : "⭕ will win!")
+            }, 300);
+          }
+          color = 3 - color;
         }
       }
 
       show();
+
     </script>
   </body>
 </html>
