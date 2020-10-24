@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>async-rysly</title>
+  <style type="text/css">
+    div {
+      background-color: grey;
+      width: 100px;
+      height: 100px;
+      border-radius: 50px;
+
+      display: inline-block;
+      margin: 30px;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 100px;
+      color: #000000;
+      font-size: 30px;
+    }
+    .green.light {
+      background-color: green;
+    }
+    .yellow.light {
+      background-color: yellow;
+    }
+    .red.light {
+      background-color: red;
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="green"></div>
+<div class="yellow"></div>
+<div class="red"></div>
+<button id="next">next</button>
+
+<script type="text/javascript">
+
+  function green() {
+    var lights = document.getElementsByTagName('div');
+    for(var i = 0; i < 3; i++)
+      lights[i].classList.remove("light");
+    document.getElementsByClassName("green")[0].classList.add("light");
+
+    // var t = 10; // 倒计时
+    // var inter = setInterval(function(){fun(document.getElementsByClassName("green")[0])}, 1000);
+    // function fun(time) {
+    //   t--;
+    //   time.innerHTML = t;
+    //   if(t <= 0) {
+    //     clearInterval(inter);
+    //   }
+    // }
+  }
+
+  function yellow() {
+    var lights = document.getElementsByTagName('div');
+    for(var i = 0; i < 3; i++)
+      lights[i].classList.remove("light");
+    document.getElementsByClassName("yellow")[0].classList.add("light");
+    
+    // var t = 2;
+    // var inter = setInterval(function(){fun(document.getElementsByClassName("yellow")[0])}, 1000);
+    // function fun(time) {
+    //   t--;
+    //   time.innerHTML = t;
+    //   if(t <= 0) {
+    //     clearInterval(inter);
+    //   }
+    // }
+  }
+
+  function red() {
+    var lights = document.getElementsByTagName('div');
+    for(var i = 0; i < 3; i++)
+      lights[i].classList.remove("light");
+    document.getElementsByClassName("red")[0].classList.add("light");
+  
+    // var t = 5;
+    // var inter = setInterval(function(){fun(document.getElementsByClassName("red")[0])}, 1000);
+    // function fun(time) {
+    //   t--;
+    //   time.innerHTML = t;
+    //   if(t <= 0) {
+    //     clearInterval(inter);
+    //   }
+    // }
+  }
+
+  // 方法1----老版本----回调地狱
+  // function go() {
+  //   green();
+  //   setTimeout(function() {
+  //     yellow();
+  //     setTimeout(function() {
+  //       red();
+  //       setTimeout(function() {
+  //         go();
+  //       }, 5000)
+  //     }, 2000)
+  //   }, 10000)
+  // }
+
+  // 方法2----promise
+  function sleep(t) {
+    return new Promise((resolve, reject)=> {
+      setTimeout(resolve, t);
+    })
+  }
+  // function go() {
+  //   green();
+  //   sleep(10000).then(() => {
+  //     yellow();
+  //     return sleep(2000);
+  //   }).then(() => {
+  //     red();
+  //     return sleep(5000);
+  //   }).then(go);
+  // }
+
+  // 方法3----async
+  // async function go() {
+  //   while(true) {
+  //     green();
+  //     await sleep(10000);
+  //     yellow();
+  //     await sleep(2000);
+  //     red();
+  //     await sleep(5000);
+  //   }
+  // }
+
+
+  // 改进----交警手动控制红绿灯
+  // function happen(element, eventName) {
+  //   return new Promise((resolve, reject) => {
+  //     element.addEventListener(eventName, resolve, {once: true});
+  //   })
+  // }
+  // async function go() {
+  //   while(true) {
+  //     green();
+  //     await happen(document.getElementById("next"), "click");
+  //     yellow();
+  //     await happen(document.getElementById("next"), "click");
+  //     red();
+  //     await happen(document.getElementById("next"), "click");
+  //   }
+  // }
+
+  // 早期----generator
+  function* go() {
+    while(true) {
+      green();
+      yield sleep(1000)
+      yellow();
+      yield sleep(200)
+      red();
+      yield sleep(500)
+    }
+  }
+  function run(iterator) {
+    let {value, done} = iterator.next();
+    if(done)
+      return;
+    if(value instanceof Promise)
+      value.then(() => {
+        run(iterator);
+      }) 
+  }
+  function co(generator) {
+    return function() {
+      return run(generator());
+    }
+  }
+  go = co(go);
+
+
+  // 无限循环 1.........∞
+  // async function* counter() {
+  //   let i = 0;
+  //   while(true) {
+  //     await sleep(1000);
+  //     yield i++;
+  //   }
+  // }
+  // (async function(){
+  //   for await(let v of counter()){
+  //     console.log(v);
+  //   }
+  // })();
+
+
+  go();
+</script>
+
+</body>
+</html>
