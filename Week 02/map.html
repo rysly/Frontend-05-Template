@@ -64,6 +64,15 @@
   document.addEventListener("mouseup", () => mousedown = false);
   document.addEventListener("contextmenu", e => e.preventDefault());
 
+  /*
+  *****删除shift     删除第一个元素并返回数组的第一个元素
+  *****添加unshift   向数组的开头添加一个或更多元素，并返回新的长度
+  *****删除pop       删除最后一个元素并返回数组的最后一个元素
+  *****添加push      向数组的末尾添加一个或多个元素，并返回新的长度
+  *****队列          push和shift    unshift和pop
+  *****栈            push和pop      unshift和shift
+  */
+
   // 寻路
   function path(map, start, end) {
     var queue = [start];
@@ -71,29 +80,27 @@
     function insert(x, y) {
       if(x < 0 || x >= 100 || y < 0 || y >= 100)
         return;
-      if(map[y*100+x])
+      if(map[y * 100 + x])
         return;
-
-      map[y*100+x] = 2;
+      map[y * 100 + x] = 2;
       queue.push([x, y]);
     }
 
     while(queue.length) {
       let [x ,y] = queue.shift();
-      console.log(x, y);
       if(x === end[0] && y === end[1]) {
         return true;
       }
-      insert(x - 1, y);
-      insert(x, y - 1);
-      insert(x + 1, y);
-      insert(x, y + 1);
+      insert(x - 1, y); //左
+      insert(x, y - 1); //下
+      insert(x + 1, y); //右
+      insert(x, y + 1); //上
     }
 
     return false;
   }
 
-  path(map, [0, 0], [0, 5]);
+  path(map, [0, 0], [0, 2]);
 
 
 </script>
