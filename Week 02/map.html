@@ -85,7 +85,7 @@
    * 最好不用splice的方法：o(n)的操作
    * 
   */
-  class Sorted {
+  class Sorted { // 排序----改进----二叉堆
     constructor(data, compare) {
       this.data = data.slice();
       this.compare = compare || ( (a, b) => a -b );
@@ -117,6 +117,58 @@
   // aa.take();
   // [7, 3, 434, 5, 8, 100].sort();
 
+  class BinaryHeap { // 二叉堆----改进后
+    constructor(data, compare) {
+      this.data = data;
+      this.compare = compare;
+    }
+    take() { // 每次拿出来最小的一个
+      if(!this.data.length) 
+        return; // return的结果是undefined
+      
+      let min = this.data[0];
+      let i = 0;
+
+      while(i < this.data.length) {
+        if(i * 2 + 1 >= this.data.length)
+          break;
+        if(i * 2 + 1 >= this.data.length)
+          this.data[i] = this.data[i * 2 + 1];
+          i = i * 2 + 1;
+          break;
+        if(this.compare(this.data[i * 2 + 1], this.data[i * 2 + 2] < 0)) {
+          this.data[i] = this.data[i * 2 + 1];
+          i = i * 2 + 1;
+        } else {
+          this.data[i] = this.data[i * 2 + 2];
+          i = i * 2 + 2;
+        }
+      }
+
+      if(i < this.data.length - 1) 
+        this.insertAt(i, this.data.pop())
+      else
+        this.data.pop()
+
+      return min;
+    }
+    insertAt(i, v) {
+      this.data[i] = v;
+      while(i > 0 && this.compare(v, this.data[Math.floor((i-1)/2)] < 0)) {
+        this.data[i] = this.data[Math.floor((i-1)/2)];
+        this.data[Math.floor((i-1)/2)] = v;
+        i = Math.floor((i-1)/2);
+      }
+    }
+    give(v) {
+      this.insertAt(this.data.length, v);
+    }
+    get length() {
+      return this.data.length;
+    }
+  }
+
+
   // 寻路
   container.children[5050].style.backgroundColor = "yellow";
   // 寻路+路径打印
@@ -129,13 +181,13 @@
     async function insert(x, y, pre) {
       if(x < 0 || x >= 100 || y < 0 || y >= 100)
         return;
-      if(table[y * 100 + x]) //有墙1/2
+      if(table[y * 100 + x]) //有墙1/2----改进----最短路径
         return;
 
       await sleep(30);
       container.children[y * 100 + x].style.backgroundColor = "red";
 
-      table[y * 100 + x] = pre; //已经找过的点做一下标记
+      table[y * 100 + x] = pre; //已经找过的点做一下标记----改进----最短路径
       // queue.push([x, y]);
       queue.give([x, y]);
     }
