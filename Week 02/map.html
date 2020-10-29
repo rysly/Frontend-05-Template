@@ -17,7 +17,7 @@
     #container {
       font-size: 0; /* 去除行间距 */
       width: 700px; /* 可以用js里的br也可以用width,但是container.children里加br的话不能对应上map */
-      /* line-height: 7px; */
+      /* line-height: 7px; */ /* 去除行间距 */
     }
   </style>
 </head>
@@ -77,11 +77,13 @@
   *****添加push      向数组的末尾添加一个或多个元素，并返回新的长度
   *****队列          push和shift    unshift和pop
   *****栈            push和pop      unshift和shift
+
+  *****   slice(start, end)   从已有的数组中返回选定的元素
   */
 
   // 寻路
   container.children[5050].style.backgroundColor = "yellow";
-
+  // 寻路+路径打印
   async function path(map, start, end) {
     let table = Object.create(map);
     let queue = [start];
@@ -92,7 +94,7 @@
       if(table[y * 100 + x]) //有墙1/2
         return;
 
-      await sleep(30);
+      // await sleep(30);
       container.children[y * 100 + x].style.backgroundColor = "red";
 
       table[y * 100 + x] = pre; //已经找过的点做一下标记
@@ -106,7 +108,7 @@
         while(x != start[0] || y != start[1]) {
           path.push(map[y * 100 + x]);
           [x, y] = table[y * 100 + x];
-          await sleep(30);
+          // await sleep(30);
           container.children[y * 100 + x].style.backgroundColor = "purple";
         }
         return path;
@@ -128,6 +130,38 @@
 
   path(map, [0, 0], [50, 50]);
 
+
+  // 启发式搜索
+  class Sorted { // 每次拿出来最小的一个
+    constructor(data, compare) {
+      this.data = data.slice();
+      this.compare = compare || ( (a, b) => a -b );
+    }
+    take() {
+      if(!this.data.length) 
+        return;
+      
+      let min = this.data[0];
+      let minIndex = 0;
+
+      for(let i = 0; i < this.data.length; i++) {
+        if(this.compare(this.data[i], min) < 0) {
+          min = this.data[i];
+          minIndex = i
+        }
+      }
+      this.data[minIndex] = this.data[this.data.length - 1];
+      this.data.pop();
+      return min;
+    }
+    give() {
+      this.data.push(v);
+    }
+  }
+
+  let aa = new Sorted([7, 3, 434, 5, 8, 100])
+  aa.take();
+  [7, 3, 434, 5, 8, 100].sort();
 
 </script>
 </body>
